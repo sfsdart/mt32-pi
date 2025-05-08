@@ -43,8 +43,6 @@ $(CIRCLE_STDLIB_CONFIG) $(CIRCLE_CONFIG)&:
 
 # Apply patches
 	@${APPLY_PATCH} $(CIRCLEHOME) patches/circle-45-minimal-usb-drivers.patch
-	@${APPLY_PATCH} $(CIRCLEHOME) patches/circle-45-cp210x-remove-partnum-check.patch
-	@${APPLY_PATCH} $(CIRCLEHOME) patches/circle-45-gzip-kernel.patch
 
 ifeq ($(strip $(GC_SECTIONS)),1)
 # Enable function/data sections for circle-stdlib
