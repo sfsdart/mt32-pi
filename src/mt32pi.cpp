@@ -933,7 +933,7 @@ void CMT32Pi::UpdateMIDI()
 	ParseMIDIBytes(Buffer, nBytes);
 
 	// Reset the Active Sense timer
-	s_pThis->m_nActiveSenseTime = s_pThis->m_pTimer->GetTicks();
+	m_nActiveSenseTime = m_pTimer->GetTicks();
 }
 
 void CMT32Pi::PurgeMIDIBuffers()
@@ -1236,7 +1236,11 @@ void CMT32Pi::LCDLog(TLCDLogType Type, const char* pFormat...)
 
 	// Let LCD task pick up the message in its next update
 	else
+	{
+		// Wake from power saving mode if necessary
+		Awaken();
 		m_UserInterface.ShowSystemMessage(Buffer, Type == TLCDLogType::Spinner);
+	}
 }
 
 const char* CMT32Pi::GetNetworkDeviceShortName() const
