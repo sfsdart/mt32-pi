@@ -381,6 +381,7 @@ const TDirectoryListEntry* CFTPWorker::BuildDirectoryList(size_t& nOutEntries) c
 			{
 				TDirectoryListEntry& Entry = pEntries[nCurrentEntry++];
 				strncpy(Entry.Name, VolumeNames[i], sizeof(Entry.Name));
+				Entry.Name[sizeof(Entry.Name) - 1] = 0;
 				Entry.Type = TDirectoryListEntryType::Directory;
 				Entry.nSize = 0;
 				Entry.nLastModifedDate = 0;
@@ -462,6 +463,7 @@ bool CFTPWorker::Port(const char* pArgs)
 
 	char Buffer[TextBufferSize];
 	strncpy(Buffer, pArgs, sizeof(Buffer));
+	Buffer[sizeof(Buffer) - 1] = 0;
 
 	if (m_pDataSocket != nullptr)
 	{
