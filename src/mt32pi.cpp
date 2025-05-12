@@ -151,6 +151,10 @@ bool CMT32Pi::Initialize(bool bSerialMIDIAvailable)
 			m_pLCD = new CSSD1306(m_pI2CMaster, m_pConfig->LCDI2CLCDAddress, m_pConfig->LCDWidth, m_pConfig->LCDHeight, m_pConfig->LCDRotation, m_pConfig->LCDMirror);
 			break;
 
+		case CConfig::TLCDType::ST7789SPI:
+			m_pLCD = new CST7789();
+			break;
+
 		default:
 			break;
 	}
