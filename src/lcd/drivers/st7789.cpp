@@ -26,10 +26,20 @@
 #include "lcd/barchars.h"
 #include "lcd/drivers/hd44780.h"
 
-CST7789::CST7789(CSPIMaster* pSPIMaster, u8 nAddress, u8 nWidth, u8 nHeight, TLCDRotation Rotation)
-        : CSSD1306(pI2CMaster, nAddress, nWidth, nHeight, Rotation)
+CST7789::CST7789(CSPIMaster* pSPIMaster, u8 nAddress, u8 nWidth, u8 nHeight, TLCDRotation Rotation, TLCDMirror Mirror)
+        : CLCD(nWidth, nHeight),
+          m_pSPIMaster(pSPIMaster),
+          m_nAddress(nAddress),
+          m_Rotation(Rotation),
+          m_Mirror(Mirror),
+	  m_nWidth(nWidth),
+	  m_nHeight(nHeight),
+
+          m_FrameBuffers{{0x40, {0}}, {0x40, {0}}},
+          m_nCurrentFrameBuffer(0)
 {
 }
+
 
 
 bool CST7789::Initialize()
@@ -41,6 +51,34 @@ void CST7789::Print(const char* pText, u8 nCursorX, u8 nCursorY, bool bClearLine
 {
 	;
 }
+
+void CST7789::WriteCommand(u8 nCommand) const
+{
+        const u8 Buffer[] = { 0x80, nCommand };
+        m_pI2CMaster->Write(m_nAddress, Buffer, sizeof(Buffer));
+}
+
+void CSSD1306::SetPixel(u8 nX, u8 nY)
+{
+	m_Display.SetPixel(nX, nY,
+        // Ensure range is within 0-127 for x, 0-63 for y
+        nX %= m_nWidth;
+        nY %= m_hHeight;
+
+        u8* pFrameBuffer = m_FrameBuffers[m_nCurrentFrameBuffer].FrameBuffer;
+        pFrameBuffer[((nY & 0xF8) << 4) + nX] |= 1 << (nY & 7);
+}
+
+void CSSD1306::ClearPixel(u8 nX, u8 nY)
+{
+        // Ensure range is within 0-127 for x, 0-63 for y
+        nX &= 0x7F;
+        nY &= 0x3F;
+
+        u8* pFrameBuffer = m_FrameBuffers[m_nCurrentFrameBuffer].FrameBuffer;
+        pFrameBuffer[((nY & 0xF8) << 4) + nX] &= ~(1 << (nY & 7));
+}
+
 
 void CST7789::Clear(bool bImmediate)
 {

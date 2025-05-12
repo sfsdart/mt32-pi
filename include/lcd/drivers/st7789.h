@@ -1,5 +1,5 @@
 //
-// ssd1306.h
+// st7789.h
 //
 // mt32-pi - A baremetal MIDI synthesizer for Raspberry Pi
 // Copyright (C) 2020-2023 Dale Whinham <daleyo@gmail.com>
@@ -20,17 +20,17 @@
 // mt32-pi. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef _ssd1306_h
-#define _ssd1306_h
+#ifndef _st7789_h
+#define _st7789_h
 
-#include <circle/i2cmaster.h>
+#include <circle/spimaster.h>
 #include <circle/types.h>
 
 #include "lcd/lcd.h"
 #include "synth/mt32synth.h"
 #include "utility.h"
 
-class CSSD1306 : public CLCD
+class CST7789 : public CLCD
 {
 public:
 	#define ENUM_LCDROTATION(ENUM) \
@@ -44,7 +44,7 @@ public:
 	CONFIG_ENUM(TLCDRotation, ENUM_LCDROTATION);
 	CONFIG_ENUM(TLCDMirror, ENUM_LCDMIRROR);
 
-	CSSD1306(CI2CMaster* pI2CMaster, u8 nAddress = 0x3C, u8 nWidth = 128, u8 nHeight = 32, TLCDRotation Rotation = TLCDRotation::Normal, TLCDMirror Mirror = TLCDMirror::Normal);
+	CST7789(CSPIMaster* pSPIMaster, u8 nAddress = 0x00, u8 nWidth = 240, u8 nHeight = 280, TLCDRotation Rotation = TLCDRotation::Normal, TLCDMirror Mirror = TLCDMirror::Normal);
 
 	// CLCD
 	virtual bool Initialize() override;
@@ -68,7 +68,7 @@ protected:
 	struct TFrameBufferUpdatePacket
 	{
 		u8 DataControlByte;
-		u8 FrameBuffer[128 * 64 / 8];
+		u8 FrameBuffer[240 * 280 / 8];
 	}
 	PACKED;
 
@@ -76,7 +76,8 @@ protected:
 	virtual void WriteFrameBuffer(bool bForceFullUpdate = false) const;
 	void SwapFrameBuffers();
 
-	CI2CMaster* m_pI2CMaster;
+	CSPIMaster* m_pSPIMaster;
+	CST7789Display m_Display;
 	u8 m_nAddress;
 	TLCDRotation m_Rotation;
 	TLCDMirror m_Mirror;
@@ -84,16 +85,6 @@ protected:
 	// Double framebuffers
 	TFrameBufferUpdatePacket m_FrameBuffers[2];
 	u8 m_nCurrentFrameBuffer;
-};
-
-class CSH1106 : public CSSD1306
-{
-public:
-	CSH1106(CI2CMaster* pI2CMaster, u8 nAddress = 0x3C, u8 nWidth = 128, u8 nHeight = 32, TLCDRotation Rotation = TLCDRotation::Normal);
-
-private:
-	void WriteData(const u8* pData, size_t nSize) const;
-	virtual void WriteFrameBuffer(bool bForceFullUpdate = false) const override;
 };
 
 #endif
