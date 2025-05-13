@@ -1,0 +1,19 @@
+diff --git a/boot/Makefile b/boot/Makefile
+index 236f32e1..72a5d116 100644
+--- a/boot/Makefile
++++ b/boot/Makefile
+@@ -32,12 +32,12 @@ firmware: clean
+ 	@for file in $(FILES) ; \
+ 	do \
+ 		echo Downloading $$file ... ; \
+-		wget -q -O $$file $(BASEURL)/$$file?raw=true ; \
++		wget --random-wait --wait 5 --retry-on-http-error=429 -O $$file $(BASEURL)/$$file?raw=true ; \
+ 	done
+ 	@for file in $(OVERLAYS) ; \
+ 	do \
+ 		echo Downloading $$file ... ; \
+-		wget -q -O $$file $(BASEURL)/overlays/$$file?raw=true ; \
++		wget --random-wait --wait 5 --retry-on-http-error=429 -O $$file $(BASEURL)/overlays/$$file?raw=true ; \
+ 	done
+ 
+ all: firmware armstub bootloader
