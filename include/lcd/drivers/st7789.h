@@ -27,24 +27,14 @@
 #include <circle/types.h>
 
 #include "lcd/lcd.h"
+#include <display/st7789display.h>
 #include "synth/mt32synth.h"
 #include "utility.h"
 
 class CST7789 : public CLCD
 {
 public:
-	#define ENUM_LCDROTATION(ENUM) \
-		ENUM(Normal, normal)       \
-		ENUM(Inverted, inverted)
-
-	#define ENUM_LCDMIRROR(ENUM) \
-		ENUM(Normal, normal)       \
-		ENUM(Mirrored, mirrored)
-
-	CONFIG_ENUM(TLCDRotation, ENUM_LCDROTATION);
-	CONFIG_ENUM(TLCDMirror, ENUM_LCDMIRROR);
-
-	CST7789(CSPIMaster* pSPIMaster, u8 nAddress = 0x00, u8 nWidth = 240, u8 nHeight = 280, TLCDRotation Rotation = TLCDRotation::Normal, TLCDMirror Mirror = TLCDMirror::Normal);
+	CST7789(CSPIMaster* pSPIMaster, u8 nAddress = 0x00, u16 nWidth = 240, u16 nHeight = 280);
 
 	// CLCD
 	virtual bool Initialize() override;
@@ -67,20 +57,17 @@ public:
 protected:
 	struct TFrameBufferUpdatePacket
 	{
-		u8 DataControlByte;
-		u8 FrameBuffer[240 * 280 / 8];
+		u8 FrameBuffer[240 * 280];
 	}
 	PACKED;
 
-	void WriteCommand(u8 nCommand) const;
 	virtual void WriteFrameBuffer(bool bForceFullUpdate = false) const;
 	void SwapFrameBuffers();
 
-	CSPIMaster* m_pSPIMaster;
 	CST7789Display m_Display;
 	u8 m_nAddress;
-	TLCDRotation m_Rotation;
-	TLCDMirror m_Mirror;
+	u16 m_nWidth;
+	u16 m_nHeight;
 
 	// Double framebuffers
 	TFrameBufferUpdatePacket m_FrameBuffers[2];

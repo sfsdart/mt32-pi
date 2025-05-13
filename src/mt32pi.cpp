@@ -30,6 +30,7 @@
 
 #include "lcd/drivers/hd44780.h"
 #include "lcd/drivers/ssd1306.h"
+#include "lcd/drivers/st7789.h"
 #include "lcd/ui.h"
 #include "mt32pi.h"
 
@@ -152,7 +153,7 @@ bool CMT32Pi::Initialize(bool bSerialMIDIAvailable)
 			break;
 
 		case CConfig::TLCDType::ST7789SPI:
-			m_pLCD = new CST7789();
+			m_pLCD = new CST7789(m_pSPIMaster, m_pConfig->LCDI2CLCDAddress, m_pConfig->LCDWidth, m_pConfig->LCDHeight);
 			break;
 
 		default:

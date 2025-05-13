@@ -1,0 +1,12 @@
+diff --git a/Makefile b/Makefile
+index 41e5b40..4ffd8ef 100644
+--- a/Makefile
++++ b/Makefile
+@@ -11,6 +11,7 @@ circle:
+ 	$(MAKE) -C libs/circle/addon/SDCard
+ 	$(MAKE) -C libs/circle/addon/fatfs
+ 	$(MAKE) -C libs/circle/addon/qemu
++	$(MAKE) -C libs/circle/addon/display
+ 	cd libs/circle/addon/wlan && ./makeall --nosample
+ 
+ newlib:

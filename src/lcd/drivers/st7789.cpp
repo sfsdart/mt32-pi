@@ -24,14 +24,15 @@
 #include <circle/timer.h>
 
 #include "lcd/barchars.h"
-#include "lcd/drivers/hd44780.h"
+#include "lcd/drivers/st7789.h"
 
-CST7789::CST7789(CSPIMaster* pSPIMaster, u8 nAddress, u8 nWidth, u8 nHeight, TLCDRotation Rotation, TLCDMirror Mirror)
+#define MY_COLOR                ST7789_COLOR (31, 31, 15)       // any color
+
+
+CST7789::CST7789(CSPIMaster* pSPIMaster, u8 nAddress, u16 nWidth, u16 nHeight)
         : CLCD(nWidth, nHeight),
-          m_pSPIMaster(pSPIMaster),
+	  m_Display(pSPIMaster, 0, 0, 0, 0, 0, 0, 0, 0, 0),
           m_nAddress(nAddress),
-          m_Rotation(Rotation),
-          m_Mirror(Mirror),
 	  m_nWidth(nWidth),
 	  m_nHeight(nHeight),
 
@@ -44,7 +45,11 @@ CST7789::CST7789(CSPIMaster* pSPIMaster, u8 nAddress, u8 nWidth, u8 nHeight, TLC
 
 bool CST7789::Initialize()
 {
+	bool bOk = TRUE;
 
+	bOk = m_Display.Initialize();
+
+	return bOk;
 }
 
 void CST7789::Print(const char* pText, u8 nCursorX, u8 nCursorY, bool bClearLine, bool bImmediate)
@@ -52,24 +57,39 @@ void CST7789::Print(const char* pText, u8 nCursorX, u8 nCursorY, bool bClearLine
 	;
 }
 
-void CST7789::WriteCommand(u8 nCommand) const
+void CST7789::WriteFrameBuffer(bool bForceFullUpdate) const
 {
-        const u8 Buffer[] = { 0x80, nCommand };
-        m_pI2CMaster->Write(m_nAddress, Buffer, sizeof(Buffer));
+        // Reset start line
+        //WriteCommand(SetStartLine | 0x00);
+
+        // Compare two framebuffers
+        //const size_t nFrameBufferSize = m_nWidth * m_nHeight / 8;
+        //const bool bNeedsUpdate = bForceFullUpdate || memcmp(m_FrameBuffers[0].FrameBuffer, m_FrameBuffers[1].FrameBuffer, nFrameBufferSize) != 0;
+
+        // Copy entire framebuffer
+        //if (bNeedsUpdate)
+        //        m_pI2CMaster->Write(m_nAddress, &m_FrameBuffers[m_nCurrentFrameBuffer], sizeof(TFrameBufferUpdatePacket::DataControlByte) + nFrameBufferSize);
 }
 
-void CSSD1306::SetPixel(u8 nX, u8 nY)
+void CST7789::SwapFrameBuffers()
 {
-	m_Display.SetPixel(nX, nY,
+        // Make other framebuffer current
+        m_nCurrentFrameBuffer = (m_nCurrentFrameBuffer + 1) % 2;
+}
+
+
+void CST7789::SetPixel(u8 nX, u8 nY)
+{
+	m_Display.SetPixel(nX, nY, MY_COLOR);
         // Ensure range is within 0-127 for x, 0-63 for y
         nX %= m_nWidth;
-        nY %= m_hHeight;
+        nY %= m_nHeight;
 
         u8* pFrameBuffer = m_FrameBuffers[m_nCurrentFrameBuffer].FrameBuffer;
         pFrameBuffer[((nY & 0xF8) << 4) + nX] |= 1 << (nY & 7);
 }
 
-void CSSD1306::ClearPixel(u8 nX, u8 nY)
+void CST7789::ClearPixel(u8 nX, u8 nY)
 {
         // Ensure range is within 0-127 for x, 0-63 for y
         nX &= 0x7F;
@@ -79,13 +99,38 @@ void CSSD1306::ClearPixel(u8 nX, u8 nY)
         pFrameBuffer[((nY & 0xF8) << 4) + nX] &= ~(1 << (nY & 7));
 }
 
+void CST7789::DrawFilledRect(u8 nX1, u8 nY1, u8 nX2, u8 nY2, bool bImmediate)
+{
+
+
+}
+
+void CST7789::DrawChar(char chChar, u8 nCursorX, u8 nCursorY, bool bInverted, bool bDoubleWidth)
+{
+
+}
+
+void CST7789::Flip()
+{
+        WriteFrameBuffer();
+        SwapFrameBuffers();
+}
+
+void CST7789::DrawImage(TImage Image, bool bImmediate)
+{
+
+}
 
 void CST7789::Clear(bool bImmediate)
 {
 	if (!bImmediate)
 		return;
 
-	WriteCommand(0b0001);
 	CTimer::SimpleMsDelay(50);
+}
+
+void CST7789::SetBacklightState(bool bEnabled)
+{
+
 }
 
