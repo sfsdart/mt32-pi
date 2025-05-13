@@ -26,7 +26,8 @@
 #include "lcd/barchars.h"
 #include "lcd/drivers/st7789.h"
 
-#define MY_COLOR                ST7789_COLOR (31, 31, 15)       // any color
+#define FORE_COLOR                ST7789_COLOR (31, 31, 15)       // any color
+#define BACK_COLOR		ST7789_COLOR (0, 0, 0)
 
 
 CST7789::CST7789(CSPIMaster* pSPIMaster, u8 nAddress, u16 nWidth, u16 nHeight)
@@ -80,13 +81,10 @@ void CST7789::SwapFrameBuffers()
 
 void CST7789::SetPixel(u8 nX, u8 nY)
 {
-	m_Display.SetPixel(nX, nY, MY_COLOR);
-        // Ensure range is within 0-127 for x, 0-63 for y
         nX %= m_nWidth;
         nY %= m_nHeight;
 
-        u8* pFrameBuffer = m_FrameBuffers[m_nCurrentFrameBuffer].FrameBuffer;
-        pFrameBuffer[((nY & 0xF8) << 4) + nX] |= 1 << (nY & 7);
+	m_Display.SetPixel(nX, nY, MY_COLOR);
 }
 
 void CST7789::ClearPixel(u8 nX, u8 nY)
